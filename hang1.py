@@ -5,9 +5,13 @@ from string import ascii_uppercase
 import random
 
 
-window=Tk()
-window.title("HangMan")
-
+w=Tk()
+w.title("HangMan")
+window=Frame(w)
+window.pack()
+frame=Frame(w)
+frame.pack()
+spet=0
 word_list=["AEROPLANE", "ADMINISTRATOR", "ACTIVITY", "ADDRESS", "APPLE", "ANACONDA",
            "BALLOON", "BEAR", "BILLION", "BEAUTIFUL", "BEHAVIOR", "BUSINESS", "BUILDING",
            "CAMEL", "COBRA", "CARROT", "CHALLENGE", "CHARACTER", "CONFERENCE", "CUSTOMER", "CENTURY", "CHOICE",
@@ -40,31 +44,36 @@ def newgame():
     global numberOfGuesses
     global the_word
     numberOfGuesses=0
+    global spet
+    spet=0
     messagebox.showinfo("No_Of_Attempts", "Total Attempt is 15")
     the_word=random.choice(word_list)
     the_word_withSpaces=" ".join(the_word)
     lblWord.set(" ".join("_"*len(the_word)))
 
 def getm():
-    import urllib.request
-    from bs4 import BeautifulSoup
-    url = "https://www.vocabulary.com/dictionary/" + the_word + ""
-    htmlfile = urllib.request.urlopen(url)
-    soup = BeautifulSoup(htmlfile, 'lxml')
+    if spet==1:
+        import urllib.request
+        from bs4 import BeautifulSoup
+        url = "https://www.vocabulary.com/dictionary/" + the_word + ""
+        htmlfile = urllib.request.urlopen(url)
+        soup = BeautifulSoup(htmlfile, 'lxml')
+        
+        soup1 = soup.find(class_="short")
+        
+        try:
+            soup1 = soup1.get_text()
+        except AttributeError:
+            messagebox.showinfo('Cannot find such word! Check spelling.')
+            exit()
+        messagebox.showinfo("SHORT MEANING: \n\n",soup1)
     
-    soup1 = soup.find(class_="short")
-    
-    try:
-        soup1 = soup1.get_text()
-    except AttributeError:
-        messagebox.showinfo('Cannot find such word! Check spelling.')
-        exit()
-    messagebox.showinfo("SHORT MEANING: \n\n",soup1)
-
-    soup2 = soup.find(class_="long")
-    soup2 = soup2.get_text()
-    messagebox.showinfo("LONG MEANING: \n\n",soup2)
-    
+        soup2 = soup.find(class_="long")
+        soup2 = soup2.get_text()
+        messagebox.showinfo("LONG MEANING: \n\n",soup2)
+    else:
+        messagebox.showinfo('Cannot Get Meaning','Finish all Attempts and\n try again !')
+        
 def guess(letter):
     global numberOfGuesses
     if numberOfGuesses!=14:
@@ -89,6 +98,8 @@ def guess(letter):
                         messagebox.showinfo("HangMan ", "ATTEMPTS COMPLETED: 12\nATTEMPTS LEFT: 3\nBE CAREFUL")
     else:
         messagebox.showinfo("HangMan","GAME OVER...!\nTRY NEXT TIME!!")
+        global spet
+        spet=1
         lblWord.set(the_word_withSpaces)
                
 lblWord=StringVar()
@@ -99,9 +110,9 @@ for c in ascii_uppercase:
     Button(window, text=c, command=lambda d=c: guess(d), font=("Consolas 18"), width=4).grid(row=1+n//9, column=n%9)
     n+=1
 
-Button(window, text="New\nGame", command=lambda:newgame(), font=("Helvetica 10 bold")).grid(row=3, column=8, sticky="NSWE")
+Button(window, text="New\nGame", command=lambda:newgame(), font=("Helvetica 10 bold"), width=4).grid(row=3, column=8, sticky="NSWE")
 newgame()
 
-Button(window, text="Get\nMeaning", command=lambda:getm(), font=("Helvetica 10 bold")).grid(row=4, column=4, sticky="NSWE")
+Button(frame, text="Get Meaning", command=lambda:getm(), font=("Helvetica 15 bold"),width=46).grid(row=3, column=8, sticky="NSWE")
 
 window.mainloop()
